@@ -17,6 +17,7 @@ async def start_handler(message: types.Message):
                 # WebAppInfo ichiga web-sahifangiz manzilini yozasiz
                 KeyboardButton(text="➕ Yangi polis rasmiylashtirish", 
                               # Kodingizdagi ushbu qatorni o'zgartiring:
+# main.py ichida linkni yangilang
 web_app=WebAppInfo(url="https://kamranchik010-bot.github.io/my-insurance-app/")),
                 KeyboardButton(text="🏢 Kompaniya haqida")
             ]
@@ -27,8 +28,19 @@ web_app=WebAppInfo(url="https://kamranchik010-bot.github.io/my-insurance-app/"))
 
 @dp.message(F.text == "🏢 Kompaniya haqida")
 async def about_company(message: types.Message):
-    # O'zingiz xohlagan matnni shu yerga yozasiz
-    await message.answer("O'zim yozaman")
+    oferta_text = (
+        "<b>OMMAVIY OFERTA</b>\n\n"
+        "Ushbu ommaviy oferta (bundan buyon matnda – oferta) <b>«SQB INSURANCE» SUG‘URTA KOMPANIYASI» AKSIYADORLIK JAMIYATI</b> "
+        "(bundan buyon matnda – sug‘urtalovchi) va sug‘urtalanuvchi o‘rtasida transport vositalari egalarining fuqarolik javobgarligini "
+        "majburiy sug‘urta qilish (bundan buyon matnda – TVEAFJMSQ) bo‘yicha E-polisni (elektron polisni) onlayn rasmiylashtirish "
+        "(shartnomani tuzish va bekor qilish) tartibini hamda sug‘urta shartlarini belgilaydi.\n\n"
+        "Mazkur oferta O‘zbekiston Respublikasining Fuqarolik kodeksi, O‘zbekiston Respublikasining «Elektron tijorat to‘g‘risida»gi, "
+        "«Elektron hujjat aylanishi to‘g‘risida»gi, «Sug‘urta faoliyati to‘g‘risida»gi Qonunlari, Vazirlar Mahkamasining 2020-yil 14-dekabrdagi "
+        "780-sonli qarori bilan tasdiqlangan E-polisni sotish, rasmiylashtirish va ularning haqiqiyligini tekshirish qoidalari hamda "
+        "Vazirlar Mahkamasining 2008-yil 24-iyundagi 141-sonli qarori bilan tasdiqlangan Transport vositalari egalarining fuqarolik "
+        "javobgarligini majburiy sug‘urta qilish qoidalari asosida ishlab chiqilgan."
+    )
+    await message.answer(oferta_text, parse_mode="HTML")
 
 async def main():
     await dp.start_polling(bot)
