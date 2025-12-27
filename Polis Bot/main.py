@@ -47,3 +47,19 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+    @dp.message(F.web_app_data)
+async def handle_webapp_data(message: types.Message):
+    import json
+    # JSON ma'lumotni o'qiymiz
+    result = json.loads(message.web_app_data.data)
+    
+    response_text = (
+        f"📩 <b>Yangi ariza kelib tushdi!</b>\n\n"
+        f"📋 <b>Sug'urta turi:</b> {result['type']}\n"
+        f"👤 <b>Mijoz:</b> {result['name']}\n"
+        f"📞 <b>Tel:</b> {result['phone']}\n"
+        f"📝 <b>Ma'lumotlar:</b> {result['details']}"
+    )
+    
+    await message.answer(response_text, parse_mode="HTML")
