@@ -11,7 +11,6 @@ dp = Dispatcher()
 
 @dp.message(CommandStart())
 async def start_handler(message: types.Message):
-    # Asosiy menyu tugmalari
     kb = ReplyKeyboardMarkup(
         keyboard=[
             [
@@ -46,13 +45,11 @@ async def about_company(message: types.Message):
 async def handle_webapp_data(message: types.Message):
     result = json.loads(message.web_app_data.data)
     
-    # Ma'lumotlarni chiroyli formatda yig'amiz
     text = f"📩 <b>Yangi sug'urta arizasi!</b>\n\n"
     text += f"📋 <b>Turi:</b> {result.get('type')}\n"
     text += f"👤 <b>Mijoz:</b> {result.get('name')}\n"
     text += f"📞 <b>Tel:</b> {result.get('phone')}\n"
     
-    # Agar OSAGO yoki boshqa avto sug'urta bo'lsa, qo'shimcha ma'lumotlarni qo'shish
     if result.get('car_number'):
         text += f"🔢 <b>Davlat raqami:</b> {result.get('car_number')}\n"
         text += f"📄 <b>Tex-pasport:</b> {result.get('tex_passport')}\n"
@@ -65,3 +62,19 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+    @dp.message(F.web_app_data)
+async def handle_webapp_data(message: types.Message):
+    result = json.loads(message.web_app_data.data)
+    
+    text = f"✅ <b>Yangi ariza qabul qilindi!</b>\n\n"
+    text += f"📋 <b>Sug'urta turi:</b> {result.get('type')}\n"
+    text += f"👤 <b>Mijoz:</b> {result.get('name')}\n"
+    text += f"📞 <b>Tel:</b> {result.get('phone')}\n"
+    
+    if "OSGO" in result.get('type', ''):
+        text += f"🔢 <b>Davlat raqami:</b> {result.get('car_number')}\n"
+        text += f"📄 <b>Texpasport:</b> {result.get('tex_passport')}\n"
+        text += f"🚗 <b>Avto turi:</b> {result.get('car_type')}\n"
+    
+    await message.answer(text, parse_mode="HTML")
