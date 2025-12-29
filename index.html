@@ -6,90 +6,93 @@
     <title>Sug'urta Rasmiylashtirish</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; font-size: 20px; margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background-color: #219150; }
-        #success-message { display: none; text-align: center; padding: 20px; }
-        #success-message h3 { color: #27ae60; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo { display: block; margin: 0 auto 15px; max-width: 150px; }
+        h2 { text-align: center; color: #1a73e8; font-size: 18px; }
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn { background-color: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container" id="main-form">
-    <h2>Sug'urta ma'lumotlarini to'ldiring</h2>
-    
-    <div class="input-group">
-        <label>Sug'urta turini tanlang:</label>
-        <select id="insurance_type">
-            <option value="OSAGO">OSAGO</option>
-            <option value="OSGOP">OSGOP (tashuvchi)</option>
-            <option value="OSGOR">OSGOR (ish beruvchi)</option>
-            <option value="Travel">Travel (sayohat sug'urtasi)</option>
-            <option value="Baxtsiz hodisa">Baxtsiz hodisa</option>
-            <option value="Sportchilar">Sportchilar (BH)</option>
-            <option value="KASKO">KASKO</option>
-            <option value="Mulk">Mulk (ko'chmas)</option>
+<div class="card" id="app">
+    <img src="webpolis_logo.png" alt="Logo" class="logo">
+    <h2>Sug'urta ma'lumotlari</h2>
+
+    <label>Sug'urta turi:</label>
+    <select id="insurance_type" onchange="toggleFields()">
+        <option value="OSAGO">OSAGO</option>
+        <option value="OSGOP">OSGOP (Tashuvchi)</option>
+        <option value="OSGOR">OSGOR (Ish beruvchi)</option>
+        <option value="Travel">Travel (Sayohat)</option>
+        <option value="KASKO">KASKO</option>
+    </select>
+
+    <div id="auto_fields">
+        <label>Davlat raqami:</label>
+        <input type="text" id="car_number" placeholder="Masalan: 01A123AA">
+
+        <label>Tex-pasport seriyasi va raqami:</label>
+        <input type="text" id="tex_passport" placeholder="Masalan: AAC 1234567">
+
+        <label>Avtomobil turi:</label>
+        <select id="car_type">
+            <option value="Yengil avtomobil">🚗 Yengil avtomobillar</option>
+            <option value="Yuk avtomobili">🚚 Yuk avtomobillari</option>
+            <option value="Avtobus/Mikroavtobus">🚌 Avtobuslar va mikroavtobuslar</option>
+            <option value="Boshqa">🏍 Boshqa (moto/traktor)</option>
         </select>
     </div>
 
-    <div class="input-group">
-        <label>F.I.SH (To'liq):</label>
-        <input type="text" id="full_name" placeholder="Masalan: Alimov Vali">
-    </div>
+    <label>F.I.SH (To'liq):</label>
+    <input type="text" id="full_name" placeholder="Ism familiyangiz">
 
-    <div class="input-group">
-        <label>Telefon raqamingiz:</label>
-        <input type="tel" id="phone" placeholder="+998 90 123 45 67">
-    </div>
+    <label>Telefon raqami:</label>
+    <input type="tel" id="phone" value="+998" maxlength="13">
 
-    <div class="input-group">
-        <label>Avtomobil yoki ob'ekt ma'lumotlari:</label>
-        <input type="text" id="details" placeholder="Raqam yoki manzil">
-    </div>
-
-    <button class="btn" onclick="submitData()">Yuborish</button>
-</div>
-
-<div class="container" id="success-message">
-    <h3>✅ Muvaffaqiyatli!</h3>
-    <p>Ma'lumotlar yuborildi. Tez orada operatorlarimiz bog'lanishadi.</p>
-    <button class="btn" onclick="closeApp()">Yopish</button>
+    <button class="btn" onclick="sendData()">Ma'lumotlarni yuborish</button>
 </div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    function submitData() {
-        const data = {
-            type: document.getElementById('insurance_type').value,
+    function toggleFields() {
+        let type = document.getElementById('insurance_type').value;
+        let autoFields = document.getElementById('auto_fields');
+        // Faqat OSAGO turlarida avto maydonlarini ko'rsatamiz
+        if (type.startsWith('OSGO')) {
+            autoFields.classList.remove('hidden');
+        } else {
+            autoFields.classList.add('hidden');
+        }
+    }
+
+    function sendData() {
+        let type = document.getElementById('insurance_type').value;
+        let data = {
+            type: type,
             name: document.getElementById('full_name').value,
-            phone: document.getElementById('phone').value,
-            details: document.getElementById('details').value
+            phone: document.getElementById('phone').value
         };
 
+        if (type.startsWith('OSGO')) {
+            data.car_number = document.getElementById('car_number').value;
+            data.tex_passport = document.getElementById('tex_passport').value;
+            data.car_type = document.getElementById('car_type').value;
+        }
+
         if (!data.name || !data.phone) {
-            alert("Iltimos, ism va telefon raqamingizni kiriting!");
+            alert("Iltimos, ism va telefonni to'ldiring!");
             return;
         }
 
-        // Ma'lumotni botga yuborish
         tg.sendData(JSON.stringify(data));
-
-        // Interfeysni o'zgartirish
-        document.getElementById('main-form').style.display = 'none';
-        document.getElementById('success-message').style.display = 'block';
-    }
-
-    function closeApp() {
         tg.close();
     }
 </script>
-
 </body>
 </html>
