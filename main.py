@@ -38,36 +38,31 @@ async def handle_webapp_data(message: types.Message):
     try:
         data = json.loads(message.web_app_data.data)
         turi = data.get('type', '')
-        
-        text = f"✅ <b>Yangi ariza!</b>\n\n"
-        text += f"📋 <b>Turi:</b> {turi}\n"
-        text += f"👤 <b>Mijoz:</b> {data.get('name')}\n"
+        text = f"✅ <b>Yangi ariza!</b>\n\n📋 <b>Turi:</b> {turi}\n👤 <b>Mijoz:</b> {data.get('name')}\n"
         text += f"📞 <b>Tel:</b> {data.get('phone')}\n"
 
-        # KASKO ma'lumotlari (Skrinshot bo'yicha)
+        # KASKO ma'lumotlari
         if turi == "KASKO":
             text += f"📅 <b>Yili:</b> {data.get('car_year')}\n"
             text += f"🚗 <b>Modeli:</b> {data.get('car_model')}\n"
             text += f"🆔 <b>VIN:</b> {data.get('vin')}\n"
-            
-        # Baxtsiz hodisa mantiqi
+        # Baxtsiz hodisa va Sport mantiqi
         elif "hodisa" in turi.lower() or "sport" in turi.lower():
             text += f"🎂 <b>Sana:</b> {data.get('birth_date')}\n"
-            
+            if data.get('sport'): text += f"🏆 <b>Sport:</b> {data.get('sport')}\n"
         # OSAGO mantiqi
         elif "OSGO" in turi:
             text += f"🔢 <b>Raqam:</b> {data.get('car_number')}\n"
-
         # Travel mantiqi
         elif "Travel" in turi:
+            text += f"🌍 <b>Davlat:</b> {data.get('country')}\n"
             text += f"🛂 <b>Pasport:</b> {data.get('passport')}\n"
 
         await message.answer(text, parse_mode="HTML")
-
     except Exception as e:
         await message.answer(f"Xato: {e}")
 
-# Botni ishga tushirish
+# Botni ishga tushirish funksiyasi
 async def main():
     # Pollingni boshlash
     await dp.start_polling(bot)
@@ -95,4 +90,4 @@ async def main():
 if __name__ == "__main__":
     # Dasturni yurgizish
     asyncio.run(main())
-# Kod tugadi.
+# Kod tugadi. 103-qator.

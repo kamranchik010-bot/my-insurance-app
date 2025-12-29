@@ -13,12 +13,11 @@
         select, input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .btn { background-color: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
         .hidden { display: none; }
-        .confirm-box { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px dashed #28a745; line-height: 1.6; }
     </style>
 </head>
 <body>
 <div class="card" id="main-form">
-    <img src="webpolis_logo.png" alt="Logo" class="logo">
+    <img src="logo.png" alt="Logo" class="logo">
     <label>Sug'urta turini tanlang:</label>
     <select id="insurance_type" onchange="toggleSections()">
         <option value="OSAGO">OSAGO</option>
@@ -30,43 +29,37 @@
         <option value="KASKO">KASKO</option>
     </select>
     <div id="car_section">
-        <label>Davlat raqami:</label>
-        <input type="text" id="car_number" placeholder="01K384SO">
-        <label>Texpasport:</label>
-        <input type="text" id="tex_passport" placeholder="ACC 01223456">
+        <label>Davlat raqami:</label><input type="text" id="car_number" placeholder="01K384SO">
+        <label>Texpasport:</label><input type="text" id="tex_passport" placeholder="ACC 01223456">
     </div>
     <div id="kasko_section" class="hidden">
-        <label>Avto ishlab chiqarilgan yili (misol: 2015):</label>
-        <input type="number" id="car_year" placeholder="2020">
-        <label>Avtomobil modelini kiriting (misol: Nexia 3):</label>
-        <input type="text" id="car_model" placeholder="Nexia 3">
-        <label>VIN kiriting (misol: XTA...):</label>
-        <input type="text" id="vin_code" placeholder="XTA123456789">
+        <label>Yili:</label><input type="number" id="car_year" placeholder="2020">
+        <label>Modeli:</label><input type="text" id="car_model" placeholder="Nexia 3">
+        <label>VIN:</label><input type="text" id="vin_code" placeholder="XTA123456789">
     </div>
     <div id="travel_section" class="hidden">
-        <label>Zagranpasport:</label>
-        <input type="text" id="passport" placeholder="AA 1234567">
         <label>Mamlakat:</label>
-        <select id="country"><option value="🇹🇷 Turkiya">🇹🇷 Turkiya</option><option value="🇦🇪 BAA">🇦🇪 BAA</option></select>
+        <select id="country" onchange="checkOther('country', 'other_country_div')">
+            <option value="🇹🇷 Turkiya">🇹🇷 Turkiya</option><option value="🇦🇪 BAA">🇦🇪 BAA</option>
+            <option value="Other">📝 Boshqa...</option>
+        </select>
+        <input type="text" id="other_country" class="hidden" placeholder="Mamlakatni yozing">
+        <label>Zagranpasport:</label><input type="text" id="passport" placeholder="AA 1234567">
     </div>
     <div id="accident_section" class="hidden">
-        <label>Tug'ilgan sana:</label>
-        <input type="date" id="birth_date">
+        <label>Tug'ilgan sana:</label><input type="date" id="birth_date">
         <div id="sport_div" class="hidden">
             <label>Sport turi:</label>
-            <select id="sport_type"><option value="⚽ Futbol">⚽ Futbol</option><option value="🥊 Boks">🥊 Boks</option></select>
+            <select id="sport_type" onchange="checkOther('sport_type', 'other_sport_div')">
+                <option value="⚽ Futbol">⚽ Futbol</option><option value="🥊 Boks">🥊 Boks</option>
+                <option value="Other">📝 Boshqa...</option>
+            </select>
+            <input type="text" id="other_sport" class="hidden" placeholder="Sport turini yozing">
         </div>
     </div>
-    <label>F.I.SH:</label>
-    <input type="text" id="full_name" placeholder="Ism Familiya">
-    <label>Telefon:</label>
-    <input type="tel" id="phone" value="+998">
-    <button class="btn" onclick="showConfirmation()">Tekshirish</button>
-</div>
-<div class="card hidden" id="confirm-form">
-    <div class="confirm-box" id="summary"></div>
+    <label>F.I.SH:</label><input type="text" id="full_name" placeholder="Ism Familiya">
+    <label>Telefon:</label><input type="tel" id="phone" value="+998">
     <button class="btn" onclick="sendToBot()">✅ Tasdiqlash</button>
-    <button class="btn" style="background:#dc3545;" onclick="location.reload()">❌ Qayta kiritish</button>
 </div>
 <script>
     let tg = window.Telegram.WebApp;
@@ -78,15 +71,13 @@
         document.getElementById('accident_section').className = (t.includes('hodisa') || t.includes('Sportchilar')) ? '' : 'hidden';
         document.getElementById('sport_div').className = (t.includes('Sportchilar')) ? '' : 'hidden';
     }
-    function showConfirmation() {
-        let t = document.getElementById('insurance_type').value;
-        let s = `<b>Turi:</b> ${t}<br><b>Mijoz:</b> ${document.getElementById('full_name').value}<br>`;
-        if(t === 'KASKO') s += `<b>Yil:</b> ${document.getElementById('car_year').value}<br><b>Model:</b> ${document.getElementById('car_model').value}<br><b>VIN:</b> ${document.getElementById('vin_code').value}`;
-        document.getElementById('summary').innerHTML = s;
-        document.getElementById('main-form').classList.add('hidden');
-        document.getElementById('confirm-form').classList.remove('hidden');
+    function checkOther(sId, dId) {
+        let v = document.getElementById(sId).value;
+        document.getElementById(sId === 'country' ? 'other_country' : 'other_sport').className = (v === 'Other') ? '' : 'hidden';
     }
     function sendToBot() {
+        let c = document.getElementById('country').value;
+        let s = document.getElementById('sport_type').value;
         let d = {
             type: document.getElementById('insurance_type').value,
             name: document.getElementById('full_name').value,
@@ -96,7 +87,9 @@
             vin: document.getElementById('vin_code').value,
             car_number: document.getElementById('car_number').value,
             birth_date: document.getElementById('birth_date').value,
-            passport: document.getElementById('passport').value
+            passport: document.getElementById('passport').value,
+            country: c === 'Other' ? document.getElementById('other_country').value : c,
+            sport: s === 'Other' ? document.getElementById('other_sport').value : s
         };
         tg.sendData(JSON.stringify(d));
     }
