@@ -6,105 +6,99 @@
     <title>SQB Insurance</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; padding: 15px; }
+        body { font-family: sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .logo { display: block; margin: 0 auto 15px; max-width: 120px; }
-        label { display: block; margin-top: 10px; font-weight: bold; color: #444; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #444; font-size: 14px; }
         select, input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .btn { background-color: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
         .hidden { display: none; }
-        .confirm-box { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px dashed #28a745; }
+        .confirm-box { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px dashed #28a745; line-height: 1.6; }
     </style>
 </head>
 <body>
-
 <div class="card" id="main-form">
     <img src="webpolis_logo.png" alt="Logo" class="logo">
-    
     <label>Sug'urta turini tanlang:</label>
-    <select id="insurance_type" onchange="updateUI()">
+    <select id="insurance_type" onchange="toggleSections()">
         <option value="OSAGO">OSAGO</option>
-        <option value="OSGOP (tashuvchi)">OSAGOP (tashuvchi)</option>
-        <option value="OSGOR (ish beruvchi)">OSAGOR (ish beruvchi)</option>
-        <option value="Travel (sayohat sug'urtasi)">Travel (sayohat sug'urtasi)</option>
+        <option value="OSGOP (tashuvchi)">OSGOP (tashuvchi)</option>
+        <option value="OSGOR (ish beruvchi)">OSGOR (ish beruvchi)</option>
+        <option value="Travel (sayohat)">Travel (sayohat)</option>
         <option value="Baxtsiz hodisa">Baxtsiz hodisa</option>
         <option value="Sportchilar (BH)">Sportchilar (BH)</option>
         <option value="KASKO">KASKO</option>
-        <option value="Mulk (ko'chmas)">Mulk (ko'chmas)</option>
     </select>
-
     <div id="car_section">
         <label>Davlat raqami:</label>
         <input type="text" id="car_number" placeholder="01K384SO">
-
-        <label>Texpasport seriyasi va raqami:</label>
+        <label>Texpasport:</label>
         <input type="text" id="tex_passport" placeholder="ACC 01223456">
-
-        <label>Avto turi:</label>
-        <select id="car_type">
-            <option value="Yengil avtomobillar">🚗 Yengil avtomobillar</option>
-            <option value="Yuk avtomobillari">🚚 Yuk avtomobillari</option>
-            <option value="Avtobuslar va mikroavtobuslar">🚌 Avtobuslar va mikroavtobuslar</option>
-            <option value="Boshqa (moto/traktor/maxsus)">🚜 Boshqa</option>
-        </select>
     </div>
-
+    <div id="kasko_section" class="hidden">
+        <label>Avto ishlab chiqarilgan yili (misol: 2015):</label>
+        <input type="number" id="car_year" placeholder="2020">
+        <label>Avtomobil modelini kiriting (misol: Nexia 3):</label>
+        <input type="text" id="car_model" placeholder="Nexia 3">
+        <label>VIN kiriting (misol: XTA...):</label>
+        <input type="text" id="vin_code" placeholder="XTA123456789">
+    </div>
+    <div id="travel_section" class="hidden">
+        <label>Zagranpasport:</label>
+        <input type="text" id="passport" placeholder="AA 1234567">
+        <label>Mamlakat:</label>
+        <select id="country"><option value="🇹🇷 Turkiya">🇹🇷 Turkiya</option><option value="🇦🇪 BAA">🇦🇪 BAA</option></select>
+    </div>
+    <div id="accident_section" class="hidden">
+        <label>Tug'ilgan sana:</label>
+        <input type="date" id="birth_date">
+        <div id="sport_div" class="hidden">
+            <label>Sport turi:</label>
+            <select id="sport_type"><option value="⚽ Futbol">⚽ Futbol</option><option value="🥊 Boks">🥊 Boks</option></select>
+        </div>
+    </div>
     <label>F.I.SH:</label>
-    <input type="text" id="full_name" placeholder="Ismingizni kiriting">
-
+    <input type="text" id="full_name" placeholder="Ism Familiya">
     <label>Telefon:</label>
     <input type="tel" id="phone" value="+998">
-
     <button class="btn" onclick="showConfirmation()">Tekshirish</button>
 </div>
-
 <div class="card hidden" id="confirm-form">
-    <h3 style="text-align:center">Ma'lumotlar to'g'rimi?</h3>
     <div class="confirm-box" id="summary"></div>
-    <button class="btn" onclick="sendToBot()">✅ Ma'lumotlar to'g'ri</button>
-    <button class="btn" style="background:#dc3545" onclick="backToEdit()">❌ To'g'ri emas (qayta kiritish)</button>
+    <button class="btn" onclick="sendToBot()">✅ Tasdiqlash</button>
+    <button class="btn" style="background:#dc3545;" onclick="location.reload()">❌ Qayta kiritish</button>
 </div>
-
 <script>
     let tg = window.Telegram.WebApp;
-    tg.expand();
-
-    function updateUI() {
-        let type = document.getElementById('insurance_type').value;
-        document.getElementById('car_section').style.display = type.includes('OSGO') ? 'block' : 'none';
+    function toggleSections() {
+        let t = document.getElementById('insurance_type').value;
+        document.getElementById('car_section').className = (t.includes('OSGO')) ? '' : 'hidden';
+        document.getElementById('kasko_section').className = (t === 'KASKO') ? '' : 'hidden';
+        document.getElementById('travel_section').className = (t.includes('Travel')) ? '' : 'hidden';
+        document.getElementById('accident_section').className = (t.includes('hodisa') || t.includes('Sportchilar')) ? '' : 'hidden';
+        document.getElementById('sport_div').className = (t.includes('Sportchilar')) ? '' : 'hidden';
     }
-
     function showConfirmation() {
-        let type = document.getElementById('insurance_type').value;
-        let name = document.getElementById('full_name').value;
-        let car = document.getElementById('car_number').value;
-        
-        let summaryText = `<b>Sug'urta:</b> ${type}<br><b>Mijoz:</b> ${name}`;
-        if(type.includes('OSGO')) {
-            summaryText += `<br><b>Davlat raqami:</b> ${car}<br><b>Avto turi:</b> ${document.getElementById('car_type').value}`;
-        }
-
-        document.getElementById('summary').innerHTML = summaryText;
+        let t = document.getElementById('insurance_type').value;
+        let s = `<b>Turi:</b> ${t}<br><b>Mijoz:</b> ${document.getElementById('full_name').value}<br>`;
+        if(t === 'KASKO') s += `<b>Yil:</b> ${document.getElementById('car_year').value}<br><b>Model:</b> ${document.getElementById('car_model').value}<br><b>VIN:</b> ${document.getElementById('vin_code').value}`;
+        document.getElementById('summary').innerHTML = s;
         document.getElementById('main-form').classList.add('hidden');
         document.getElementById('confirm-form').classList.remove('hidden');
     }
-
-    function backToEdit() {
-        document.getElementById('main-form').classList.remove('hidden');
-        document.getElementById('confirm-form').classList.add('hidden');
-    }
-
     function sendToBot() {
-        let data = {
+        let d = {
             type: document.getElementById('insurance_type').value,
             name: document.getElementById('full_name').value,
             phone: document.getElementById('phone').value,
+            car_year: document.getElementById('car_year').value,
+            car_model: document.getElementById('car_model').value,
+            vin: document.getElementById('vin_code').value,
             car_number: document.getElementById('car_number').value,
-            tex_passport: document.getElementById('tex_passport').value,
-            car_type: document.getElementById('car_type').value
+            birth_date: document.getElementById('birth_date').value,
+            passport: document.getElementById('passport').value
         };
-        tg.sendData(JSON.stringify(data));
-        tg.close();
+        tg.sendData(JSON.stringify(d));
     }
 </script>
 </body>
